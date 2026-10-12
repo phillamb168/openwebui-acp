@@ -16,13 +16,14 @@ RUN git apply --check /tmp/buzz-single-event.patch /tmp/buzz-persona-yaml.patch 
 RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked --mount=type=cache,target=/usr/local/cargo/git,sharing=locked cargo +1.98.1 build --locked --release -p buzz-acp -p buzz-cli
 
 FROM debian:bookworm-slim@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171 AS runtime-tools
-RUN apt-get update && apt-get install -y --no-install-recommends tini && install -d -o 10001 -g 10001 -m 700 /state /home/runner
+RUN apt-get update && apt-get install -y --no-install-recommends tini && install -d -o 10001 -g 10001 -m 700 /rootfs/state /rootfs/home/runner
 
 FROM gcr.io/distroless/cc-debian13:nonroot@sha256:e792ab3d241a468a4fd7519ddbbebe66b49b5f365771716ea688ad40b6c6f1c2 AS runtime
 COPY --from=runtime-tools /usr/bin/tini /usr/bin/tini
 COPY --from=runtime-tools /usr/share/doc/tini/copyright /usr/share/doc/openwebui-acp/tini-copyright
-COPY --from=runtime-tools --chown=10001:10001 --chmod=0700 /state /state
-COPY --from=runtime-tools --chown=10001:10001 --chmod=0700 /home/runner /home/runner
+# Copy the parent tree so each private directory is an entry with its own
+# metadata. Copying an empty directory directly can leave destination defaults.
+COPY --from=runtime-tools /rootfs/ /
 COPY --from=adapter /src/target/release/openwebui-acp /usr/local/bin/
 COPY --from=adapter /src/target/release/examples/sidecar_launcher /usr/local/bin/sidecar-launcher
 COPY --from=runner /buzz/target/release/buzz-acp /buzz/target/release/buzz /usr/local/bin/

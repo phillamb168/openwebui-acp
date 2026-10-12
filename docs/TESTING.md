@@ -35,6 +35,7 @@ Keep the Open WebUI fixture running. These commands create a separate relay, dat
 
 ```sh
 docker build -t openwebui-acp-sidecar:local -t openwebui-acp-sidecar:0.1.0-rc.2 -f deploy/sidecar/Dockerfile .
+python3 tests/integration/check_image.py
 python3 tests/integration/prepare_relay.py
 docker compose -f tests/integration/buzz-compose.yml up -d --wait relay
 python3 tests/integration/buzz_fixture.py
@@ -42,7 +43,9 @@ docker compose -f tests/integration/buzz-compose.yml --profile agent up -d agent
 python3 tests/integration/run_buzz.py
 ```
 
-The test obtains a real server tool result, checks A/B thread isolation, restarts the runner, continues the original chat, and verifies exact recipient/thread tags and state ownership. Before sending requests, it waits for the current container start's ACP pool and channel subscription; an existing journal or running container alone does not establish readiness. Fixture logging is enabled for this check, with generated credentials redacted from bounded startup-failure diagnostics. The Dockerfile's documented runner patches are included. Run suites using this provider sequentially: their global inference counters deliberately detect unexpected calls.
+The image check initializes the adapter's private journal with no network or prompts, using both the image directory and a fresh named volume. It removes its own test containers/volume afterwards. This catches ownership and mode differences across Docker builders before attempting a model turn.
+
+The relay test obtains a real server tool result, checks A/B thread isolation, restarts the runner, continues the original chat, and verifies exact recipient/thread tags and state ownership. Before sending requests, it waits for the current container start's ACP pool and channel subscription; an existing journal or running container alone does not establish readiness. Fixture logging is enabled for this check, with generated credentials redacted from bounded startup-failure diagnostics. The Dockerfile's documented runner patches are included. Run suites using this provider sequentially: their global inference counters deliberately detect unexpected calls.
 
 ## Fresh Linux VM
 

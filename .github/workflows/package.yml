@@ -67,6 +67,7 @@ jobs:
           mkdir -p dist
           version=$(python3 -c 'import tomllib; print(tomllib.load(open("Cargo.toml", "rb"))["package"]["version"])')
           docker build -t "openwebui-acp-sidecar:$version-$ARCH" -f deploy/sidecar/Dockerfile .
+          python3 tests/integration/check_image.py --image "openwebui-acp-sidecar:$version-$ARCH"
           docker save "openwebui-acp-sidecar:$version-$ARCH" | gzip -n > "dist/openwebui-acp-sidecar-$version-$ARCH.tar.gz"
           helm package deploy/chart --destination dist
           cd dist

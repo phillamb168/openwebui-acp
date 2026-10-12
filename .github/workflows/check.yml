@@ -76,6 +76,7 @@ jobs:
       - run: python3 tests/integration/bootstrap.py
       - run: python3 tests/integration/run_smoke.py
       - run: docker build -t openwebui-acp-sidecar:local -t openwebui-acp-sidecar:0.1.0-rc.2 -f deploy/sidecar/Dockerfile .
+      - run: python3 tests/integration/check_image.py
       - name: Scan sidecar OS packages
         run: |
           docker save openwebui-acp-sidecar:local -o "$RUNNER_TEMP/sidecar.tar"
