@@ -17,7 +17,7 @@ flowchart LR
   A -. explicit signed reply .-> B
 ```
 
-This is a **0.1.0-rc.2 prerelease candidate** for external validation. Source is available in [phillamb168/openwebui-acp](https://github.com/phillamb168/openwebui-acp); downloadable releases follow hosted verification. See [tested compatibility](docs/COMPATIBILITY.md), [release artifacts](docs/RELEASE.md) and the [publication handoff](docs/PUBLIC_RELEASE.md) before selecting a version. It is an adapter for a particular runtime, not a general agent orchestrator.
+This is a **0.1.0-rc.2 prerelease for early alpha testing and feature feedback**. Start with [GitHub Releases](https://github.com/phillamb168/openwebui-acp/releases) for checked downloads, or build from source below. See [tested compatibility](docs/COMPATIBILITY.md), [release artifacts](docs/RELEASE.md) and the [publication process](docs/PUBLIC_RELEASE.md) before selecting a version. It is an adapter for a particular runtime, not a general agent orchestrator.
 
 ## Choose an installation
 
@@ -48,7 +48,7 @@ install -m 600 /path/to/your/openwebui-key "$PWD/private-config/api-key"
 
 The executable waits for ACP JSON-RPC on stdin; it is not an interactive terminal chat. Configure your ACP client to launch it. First check the account/API requirements in [SETUP.md](docs/SETUP.md), including Open WebUI 0.12.0's User Status prerequisite. stdout contains only ACP, and diagnostics use stderr.
 
-Planned downloadable archives cover macOS ARM64 and Linux ARM64/x64 with glibc 2.34 or newer. The archives include checksums, build metadata and dependency notices; verify and extract them as described in [RELEASE.md](docs/RELEASE.md). Binaries are unsigned, and macOS binaries are not notarized. Windows, macOS Intel and musl/Alpine binaries are not validated release targets.
+Downloadable archives cover macOS ARM64 and Linux ARM64/x64 with glibc 2.34 or newer. The archives include checksums, build metadata and dependency notices; verify and extract them as described in [RELEASE.md](docs/RELEASE.md). Binaries are unsigned, and macOS binaries are not notarized. Windows, macOS Intel and musl/Alpine binaries are not validated release targets.
 
 Credential files and explicit `--env-file` files must be owned by the running user, regular files with mode 0600 or stricter, and have no symlinks or hard links. An adjacent `.env` is never loaded automatically. CLI values override process environment, which overrides the explicitly selected environment file. Keep credentials out of command arguments and client settings; use key-file paths.
 
@@ -87,6 +87,6 @@ Use [the Linux sidecar example](deploy/sidecar/README.md) to run `buzz-acp` and 
 
 Read [SECURITY.md](SECURITY.md), the [architecture](docs/ARCHITECTURE.md), and the [audit dispositions](docs/AUDIT.md). Run the [offline and disposable integration tests](docs/TESTING.md) before upgrading a runtime or SDK.
 
-Contributions are welcome; start with [CONTRIBUTING.md](CONTRIBUTING.md). You can run the ordinary test suite without an Open WebUI account, provider subscription or VPN. Use [GitHub issues](https://github.com/phillamb168/openwebui-acp/issues) for sanitized bug reports and [private vulnerability reporting](https://github.com/phillamb168/openwebui-acp/security/advisories/new) for security issues; never include credentials or customer conversations in an issue.
+Contributions are welcome; start with [CONTRIBUTING.md](CONTRIBUTING.md). You can run the ordinary test suite without an Open WebUI account, provider subscription or VPN. Use [Discussions](https://github.com/phillamb168/openwebui-acp/discussions) for setup questions, use cases and feature ideas, [issues](https://github.com/phillamb168/openwebui-acp/issues) for sanitized bug reports, and [private vulnerability reporting](https://github.com/phillamb168/openwebui-acp/security/advisories/new) for security issues. Never include credentials or customer conversations.
 
 MIT licensed. Dependency and upstream notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

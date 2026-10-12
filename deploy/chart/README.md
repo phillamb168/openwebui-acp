@@ -1,6 +1,6 @@
 # Kubernetes agent chart
 
-This chart installs one always-on Buzz agent beside an existing relay, using the [VM deployment's container](../sidecar/README.md). The relay, Open WebUI, databases, providers and tools remain separate services. There is no agent Service, Ingress, listening port, Kubernetes API access, or task-environment provisioner.
+This chart installs one always-on Buzz agent beside an existing relay, using the [VM deployment's container](../sidecar/README.md). The relay, Open WebUI, databases, providers and tools remain separate services. There is no agent Service, Ingress, listening port, Kubernetes API access, or task-environment provisioner. A [release download](../../docs/RELEASE.md#choose-a-download) can supply the chart and container; replace `deploy/chart` in the Helm commands with the downloaded chart's path and configure the loaded/published image tag.
 
 ## Prerequisites
 

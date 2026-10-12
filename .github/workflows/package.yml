@@ -10,6 +10,7 @@ jobs:
   package:
     needs: checks
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-24.04
@@ -36,8 +37,22 @@ jobs:
           cargo build --release --locked --target "$TARGET" --bin openwebui-acp
           "target/$TARGET/release/openwebui-acp" --version
           python3 scripts/package.py --binary "target/$TARGET/release/openwebui-acp" --target "$TARGET"
+      - name: Verify and exercise the extracted executable
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          version=$(python3 -c 'import tomllib; print(tomllib.load(open("Cargo.toml", "rb"))["package"]["version"])')
+          name="openwebui-acp-$version-$TARGET"
+          python3 scripts/verify_archive.py "dist/$name.tar.gz" --binary "target/$TARGET/release/openwebui-acp" --target "$TARGET" --extract-to "$RUNNER_TEMP/binary-extract"
+          OPENWEBUI_ACP_TEST_BINARY="$RUNNER_TEMP/binary-extract/$name/openwebui-acp" cargo test --test acp --locked
       - if: matrix.target == 'x86_64-unknown-linux-gnu'
-        run: python3 scripts/package.py --source
+        name: Verify the source archive outside any Git worktree
+        run: |
+          python3 scripts/package.py --source
+          version=$(python3 -c 'import tomllib; print(tomllib.load(open("Cargo.toml", "rb"))["package"]["version"])')
+          name="openwebui-acp-$version-source"
+          python3 scripts/verify_archive.py "dist/$name.tar.gz" --source --extract-to "$RUNNER_TEMP/source-extract"
+          CARGO_TARGET_DIR="$GITHUB_WORKSPACE/target" cargo test --manifest-path "$RUNNER_TEMP/source-extract/$name/Cargo.toml" --all-targets --locked
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: openwebui-acp-${{ matrix.target }}
@@ -47,6 +62,7 @@ jobs:
   deployment-artifacts:
     needs: checks
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-24.04
@@ -69,9 +85,14 @@ jobs:
           docker build -t "openwebui-acp-sidecar:$version-$ARCH" -f deploy/sidecar/Dockerfile .
           python3 tests/integration/check_image.py --image "openwebui-acp-sidecar:$version-$ARCH"
           docker save "openwebui-acp-sidecar:$version-$ARCH" | gzip -n > "dist/openwebui-acp-sidecar-$version-$ARCH.tar.gz"
-          helm package deploy/chart --destination dist
+          docker run --rm --mount "type=bind,source=$PWD/dist/openwebui-acp-sidecar-$version-$ARCH.tar.gz,target=/image.tar.gz,readonly" aquasec/trivy@sha256:62b1e65e8869bc4b4c6aa4fa2b21595256c7c2f6018a9d9ad61caf87187c1969 image --input /image.tar.gz --scanners vuln --pkg-types os --severity HIGH,CRITICAL --exit-code 1
+          docker image inspect "openwebui-acp-sidecar:$version-$ARCH" --format '{"id":"{{.Id}}","architecture":"{{.Architecture}}","os":"{{.Os}}","tags":{{json .RepoTags}}}' > "dist/openwebui-acp-sidecar-$version-$ARCH.image.json"
+          if [ "$ARCH" = amd64 ]; then
+            helm package deploy/chart --destination dist
+            helm show chart "dist/openwebui-acp-$version.tgz"
+          fi
           cd dist
-          sha256sum *.tar.gz *.tgz > SHA256SUMS
+          sha256sum openwebui-acp-* > SHA256SUMS
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: deployment-${{ matrix.arch }}

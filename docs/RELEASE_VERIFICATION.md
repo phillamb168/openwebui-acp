@@ -1,6 +1,6 @@
 # Local prerelease verification
 
-Candidate: **0.1.0-rc.2**. Preparation date: **2026-10-12**. This is local stage-one evidence; no public repository, hosted CI execution, registry publication or public release is claimed. [COMPATIBILITY.md](COMPATIBILITY.md) records exact upstream versions and limits; [PUBLIC_RELEASE.md](PUBLIC_RELEASE.md) describes the owner handoff.
+Candidate: **0.1.0-rc.2**. Preparation date: **2026-10-12**. The tables below preserve local stage-one evidence; public hosted verification is recorded separately at the end of this document. These historical local artifacts are not the public downloads. [COMPATIBILITY.md](COMPATIBILITY.md) records exact upstream versions and limits; [PUBLIC_RELEASE.md](PUBLIC_RELEASE.md) describes publication.
 
 ## Changes reviewed
 
@@ -42,6 +42,12 @@ The VM checks use isolated OrbStack machines with a shared kernel; x86_64 is emu
 
 Tests use synthetic local services, model responses and identities. No production inference/tool test was part of this release preparation, and installed agents were not upgraded. A test Zed launch initially selected the regular profile; it was stopped before any prompt, then relaunched with an explicitly verified isolated profile. The successful UI evidence is from that isolated fixture.
 
-## Remaining public-release gates
+## Public hosted verification
 
-The owner creates the empty public repository, reviews public attribution and enables monitored private vulnerability reporting. Import the reviewed source, execute hosted workflows, configure required checks, rebuild artifacts from the public commit and review a draft prerelease. None of those publication steps has been performed locally. The knowledge/oracle and ephemeral-development-environment system remains a separate project.
+The owner created [the public repository](https://github.com/phillamb168/openwebui-acp), reviewed attribution and confirmed security notifications. Private vulnerability reporting and protected `main` are enabled; pull requests and all five checks are required, including for administrators.
+
+[Hosted run 38288231644](https://github.com/phillamb168/openwebui-acp/actions/runs/38288231644) passed all five jobs at public commit `5cce67e66a086410e53a249d16bfb83ee3d5f234`. It ran 48 boundary tests on macOS ARM64 and both Linux architectures, scans/inventory checks, and both Linux container/Open WebUI/Buzz/Kind suites. Hosted testing exposed and fixed a subprocess state-lock race and image-directory metadata loss across Docker builders. The first fix has a deterministic regression; the second has no-network startup checks in both the bare image and a fresh volume. The fixture now waits for the runner's actual subscription before sending its first request.
+
+Public artifacts must be rebuilt from their tagged public revision. The package workflow repeats checks at that revision, verifies archive contents/checksums/metadata, exercises each extracted executable with the official-SDK mocked ACP suite, tests the extracted source outside Git, and scans the final container archives. [Release notes](https://github.com/phillamb168/openwebui-acp/releases) and each release's `VERIFICATION.json` identify the actual package run, source revision, image IDs and asset hashes. Only successful executed checks belong in that record.
+
+The knowledge/oracle and ephemeral-development-environment system remains a separate project.
