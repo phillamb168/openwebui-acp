@@ -52,7 +52,8 @@ jobs:
           version=$(python3 -c 'import tomllib; print(tomllib.load(open("Cargo.toml", "rb"))["package"]["version"])')
           name="openwebui-acp-$version-source"
           python3 scripts/verify_archive.py "dist/$name.tar.gz" --source --extract-to "$RUNNER_TEMP/source-extract"
-          CARGO_TARGET_DIR="$GITHUB_WORKSPACE/target" cargo test --manifest-path "$RUNNER_TEMP/source-extract/$name/Cargo.toml" --all-targets --locked
+          cd "$RUNNER_TEMP/source-extract/$name"
+          CARGO_TARGET_DIR="$GITHUB_WORKSPACE/target" cargo test --all-targets --locked
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: openwebui-acp-${{ matrix.target }}
