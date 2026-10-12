@@ -24,7 +24,7 @@ Use the actual Linux target on a Linux builder (`aarch64-unknown-linux-gnu` or `
 
 Build each sidecar architecture with versioned tags, scan it, and use `docker save` if handing off an offline image. Include its source revision, local image ID, platform and checksum in the handoff record. These local image IDs are not registry digests. If changing only included notices, rebuild the final image layer and rescan/package that resulting image.
 
-The manual GitHub workflow calls the reusable checks before artifact jobs at the same revision. It builds all binary targets, Linux container archives and chart packages with read-only repository permissions. It does not create a release or push a registry image. Hosted workflows still require execution/verification after public source import.
+The manual GitHub workflow calls the reusable checks before artifact jobs at the same revision. It builds all binary targets, Linux container archives and chart packages with read-only repository permissions. It does not create a release or push a registry image. Require successful [hosted checks](https://github.com/phillamb168/openwebui-acp/actions) on the exact revision being packaged.
 
 ## Verify a handoff
 

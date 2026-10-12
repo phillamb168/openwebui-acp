@@ -83,9 +83,19 @@ struct Data {
     events: BTreeMap<String, EventRecord>,
 }
 
+struct StateLock(File);
+
+impl Drop for StateLock {
+    fn drop(&mut self) {
+        // Closing only our descriptor can leave flock held by a concurrently
+        // spawned child until exec closes its inherited duplicate.
+        let _ = fs2::FileExt::unlock(&self.0);
+    }
+}
+
 pub struct Store {
     directory: Option<PathBuf>,
-    _lock: Option<File>,
+    _lock: Option<StateLock>,
     data: Mutex<Data>,
     poisoned: AtomicBool,
 }
@@ -141,7 +151,7 @@ impl Store {
             fs2::FileExt::try_lock_exclusive(&file).map_err(|_| {
                 Error::State("State directory is already in use; use one process per directory")
             })?;
-            lock = Some(file);
+            lock = Some(StateLock(file));
             let state_path = path.join("state.json");
             match fs::symlink_metadata(&state_path) {
                 Ok(_) => {
@@ -322,5 +332,35 @@ impl Store {
         }
         *current = next;
         Ok(())
+    }
+}
+
+#[cfg(all(test, unix))]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn last_store_owner_releases_lock_with_an_inherited_descriptor() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("state");
+        let scope = Scope {
+            endpoint: "https://webui.example/".into(),
+            model: "assistant".into(),
+            relay: None,
+            agent: None,
+        };
+        let store = Store::open(Some(path.clone()), scope.clone()).unwrap();
+        // A concurrent subprocess launch can inherit this open file description
+        // until exec closes it, even when the descriptor is close-on-exec.
+        let inherited = store._lock.as_ref().unwrap().0.try_clone().unwrap();
+        let other_owner = store.clone();
+        drop(store);
+        assert!(Store::open(Some(path.clone()), scope.clone()).is_err());
+        drop(other_owner);
+
+        let reopened = Store::open(Some(path.clone()), scope.clone()).unwrap();
+        assert!(inherited.metadata().is_ok());
+        assert!(Store::open(Some(path), scope).is_err());
+        drop(reopened);
     }
 }

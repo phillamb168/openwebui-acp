@@ -12,7 +12,7 @@ python3 scripts/export_check.py
 python3 tests/chart.py
 ```
 
-The 47 Rust tests cover ACP/stdout, HTTP/default projection, chat trees, requester/channel routing, signed replies, outbox recovery, account/state isolation, private files, bounds, cancellation and real SIGKILL at write boundaries. They also cover rc.1 checkpoint fingerprint compatibility and Kubernetes projected-secret validation. Six chart tests require Helm (`HELM=/absolute/path/helm` may override PATH), but no cluster. They check render/security/storage contracts and invalid configuration rejection. Python 3.11+ is sufficient for fixture scripts.
+The 48 Rust tests cover ACP/stdout, HTTP/default projection, chat trees, requester/channel routing, signed replies, outbox recovery, account/state isolation, private files, bounds, cancellation and real SIGKILL at write boundaries. They also cover lock release with an inherited descriptor, rc.1 checkpoint fingerprint compatibility and Kubernetes projected-secret validation. Six chart tests require Helm (`HELM=/absolute/path/helm` may override PATH), but no cluster. They check render/security/storage contracts and invalid configuration rejection. Python 3.11+ is sufficient for fixture scripts.
 
 ## Disposable Open WebUI
 

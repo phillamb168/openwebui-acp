@@ -1,5 +1,7 @@
 # openwebui-acp
 
+[![Check release candidate](https://github.com/phillamb168/openwebui-acp/actions/workflows/check.yml/badge.svg?branch=main)](https://github.com/phillamb168/openwebui-acp/actions/workflows/check.yml)
+
 Use an Open WebUI **Workspace model as an ACP agent** in Buzz, Zed, or another ACP v1 client. A small Rust executable carries turns over stdio to Open WebUI's saved-chat API; Open WebUI runs the model and its tools.
 
 The same binary works with arbitrary Workspace model IDs. Model prompts, generation settings, Workspace tools, MCP connections, Skills, and Knowledge stay configured in Open WebUI. Tools remain server-owned; the adapter adds neither a local tool executor nor a second function-calling loop.

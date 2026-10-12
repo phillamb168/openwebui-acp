@@ -9,6 +9,7 @@ permissions:
 jobs:
   boundaries:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-24.04, ubuntu-24.04-arm, macos-15]
     runs-on: ${{ matrix.os }}
@@ -56,6 +57,7 @@ jobs:
           diff -r licenses/generated/buzz "$RUNNER_TEMP/buzz-inventory"
   disposable-integration:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-24.04, ubuntu-24.04-arm]
     runs-on: ${{ matrix.os }}
