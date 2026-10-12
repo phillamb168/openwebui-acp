@@ -1,0 +1,44 @@
+name: Bug report
+description: Report a reproducible adapter or compatibility problem using synthetic data.
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For vulnerabilities, use Security → Report a vulnerability instead of this public form.
+        Remove keys, customer names, private URLs, chat contents and local paths. Do not attach environment dumps, state files or raw logs.
+  - type: input
+    id: versions
+    attributes:
+      label: Versions and platform
+      description: Adapter version/commit, OS and architecture, ACP client version, and Open WebUI version where relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: installation
+    attributes:
+      label: Installation path
+      description: Desktop client, Linux Compose, or Kubernetes. Include runner/relay/chart versions and storage driver where relevant. Do not paste deployment values or credentials.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Synthetic reproduction
+      description: Smallest steps or fixture that reproduce the problem without access to a real account.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and observed behavior
+      description: Include a sanitized error code or message if useful. State which checks you actually ran.
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Before submitting
+      options:
+        - label: I removed credentials and private data, and this is not a vulnerability disclosure.
+          required: true

@@ -1,0 +1,16 @@
+One agent instance is configured for Workspace model {{ .Values.openwebui.model }}.
+
+Watch startup:
+  kubectl --namespace {{ .Release.Namespace }} rollout status deployment/{{ include "openwebui-acp.name" . }}
+  kubectl --namespace {{ .Release.Namespace }} logs deployment/{{ include "openwebui-acp.name" . }} -c agent
+
+Send a new-thread mention from an allowed requester in an allowed Buzz channel.
+The agent connects outbound; it has no Service or ingress.
+
+After rotating either key in Secret {{ .Values.credentials.existingSecret }}:
+  kubectl --namespace {{ .Release.Namespace }} rollout restart deployment/{{ include "openwebui-acp.name" . }}
+
+State survives Pod replacement. Do not scale this Deployment or run another
+instance with the same identity/state. Stop only when idle for planned upgrades.
+The managed PVC is retained on uninstall. See the chart README before removal,
+reinstallation, or recovery of an interrupted tool request.

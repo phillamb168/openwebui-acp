@@ -1,0 +1,29 @@
+name: openwebui-acp-sidecar
+services:
+  agent:
+    build:
+      context: ../..
+      dockerfile: deploy/sidecar/Dockerfile
+    image: ${OPENWEBUI_ACP_IMAGE:-openwebui-acp-sidecar:0.1.0-rc.2}
+    environment:
+      OPENWEBUI_URL: ${OPENWEBUI_URL:?Set the Open WebUI HTTPS endpoint}
+      OPENWEBUI_MODEL: ${OPENWEBUI_MODEL:?Set the Workspace model ID}
+      OPENWEBUI_ACP_BUZZ_ALLOWED_AUTHORS: ${OPENWEBUI_ACP_BUZZ_ALLOWED_AUTHORS:?Set requester public keys}
+      OPENWEBUI_ACP_BUZZ_ALLOWED_CHANNELS: ${OPENWEBUI_ACP_BUZZ_ALLOWED_CHANNELS:?Set channel UUIDs}
+      OPENWEBUI_ACP_MEMORY_DEFAULT: ${OPENWEBUI_ACP_MEMORY_DEFAULT:-false}
+      OPENWEBUI_ACP_REQUIRED_TOOLS: ${OPENWEBUI_ACP_REQUIRED_TOOLS:-}
+      BUZZ_RELAY_URL: ${BUZZ_RELAY_URL:?Set the Buzz WSS endpoint}
+      RUST_LOG: warn
+    volumes:
+      - ./secrets/openwebui-key:/run/secrets/openwebui-key:ro
+      - ./secrets/buzz-key:/run/secrets/buzz-key:ro
+      - ./state:/state
+    read_only: true
+    tmpfs: ["/tmp:mode=1777,size=16m"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 64
+    mem_limit: 256m
+    cpus: 1
+    stop_grace_period: 30s
+    restart: unless-stopped

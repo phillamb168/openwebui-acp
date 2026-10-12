@@ -1,0 +1,28 @@
+name: Install pinned Helm and Kind
+description: Install verified Linux test tools into the job temporary directory.
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        case "$(uname -m)" in
+          x86_64)
+            arch=amd64
+            helm_sha=86584a54def73570558f66f5111cc53dfed56689637ae32c1201205d494f54fb
+            kind_sha=aee6151561422756b764a4ae28e7f44cda5af5a9eead3cc9985112b1de8d8e0d ;;
+          aarch64)
+            arch=arm64
+            helm_sha=31c5794dd55c66a51e6b7d2e2ac7a114ae8b1de41ff1d9ba51748ac973b06a08
+            kind_sha=20022bee6cfcd5086cb7234d218e3454e6090022f2a8f55d1fa7fcf42c3867a2 ;;
+          *) exit 1 ;;
+        esac
+        tools_dir="$RUNNER_TEMP/openwebui-acp-test-tools"
+        mkdir -p "$tools_dir/bin"
+        curl --fail --silent --show-error --location "https://get.helm.sh/helm-v4.3.0-linux-$arch.tar.gz" -o "$tools_dir/helm.tar.gz"
+        echo "$helm_sha  $tools_dir/helm.tar.gz" | sha256sum --check
+        tar -xzf "$tools_dir/helm.tar.gz" -C "$tools_dir" "linux-$arch/helm"
+        install -m 755 "$tools_dir/linux-$arch/helm" "$tools_dir/bin/helm"
+        curl --fail --silent --show-error --location "https://github.com/kubernetes-sigs/kind/releases/download/v0.33.0/kind-linux-$arch" -o "$tools_dir/bin/kind"
+        echo "$kind_sha  $tools_dir/bin/kind" | sha256sum --check
+        chmod 755 "$tools_dir/bin/kind"
+        echo "$tools_dir/bin" >> "$GITHUB_PATH"

@@ -1,0 +1,44 @@
+# Build this image locally, or select an operator-published registry image.
+image:
+  repository: openwebui-acp-sidecar
+  tag: "0.1.0-rc.2"
+  digest: ""
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+openwebui:
+  url: ""
+  model: ""
+  requiredTools: []
+  memoryDefault: false
+  timeoutSeconds: 600
+  # Only for disposable fixtures or explicitly trusted private transport.
+  allowInsecureHttp: false
+
+buzz:
+  relayUrl: ""
+  allowedAuthors: []
+  allowedChannels: []
+
+# Pre-create this Secret with keys openwebui-key and buzz-key.
+# Credentials never belong in values files or --set arguments.
+credentials:
+  existingSecret: ""
+
+persistence:
+  existingClaim: ""
+  size: 1Gi
+  # null uses the cluster default; "" requests no StorageClass.
+  storageClass: null
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: "1"
+    memory: 256Mi
+
+nodeSelector: {}
+tolerations: []
+podAnnotations: {}

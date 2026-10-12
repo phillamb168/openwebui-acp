@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Report a security vulnerability privately
+    url: https://github.com/phillamb168/openwebui-acp/security/advisories/new
+    about: Use private reporting for vulnerabilities; do not include exploit details or credentials in public issues.

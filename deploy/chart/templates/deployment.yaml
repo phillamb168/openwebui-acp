@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "openwebui-acp.name" . }}
+  labels:
+    {{- include "openwebui-acp.labels" . | nindent 4 }}
+spec:
+  # The journal has a local exclusive lock, not distributed leader election.
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: openwebui-acp
+      app.kubernetes.io/instance: {{ .Release.Name | quote }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: openwebui-acp
+        app.kubernetes.io/instance: {{ .Release.Name | quote }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: private-files
+          image: {{ include "openwebui-acp.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/usr/local/bin/sidecar-launcher", "prepare"]
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {cpu: 100m, memory: 64Mi}
+          volumeMounts:
+            - {name: projected-secrets, mountPath: /projected-secrets, readOnly: true}
+            - {name: private-secrets, mountPath: /private-secrets}
+            - {name: state, mountPath: /state-volume}
+      containers:
+        - name: agent
+          image: {{ include "openwebui-acp.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - {name: OPENWEBUI_URL, value: {{ .Values.openwebui.url | quote }}}
+            - {name: OPENWEBUI_MODEL, value: {{ .Values.openwebui.model | quote }}}
+            - {name: OPENWEBUI_ACP_REQUIRED_TOOLS, value: {{ join "," .Values.openwebui.requiredTools | quote }}}
+            - {name: OPENWEBUI_ACP_MEMORY_DEFAULT, value: {{ .Values.openwebui.memoryDefault | quote }}}
+            - {name: OPENWEBUI_ACP_TIMEOUT_SECS, value: {{ .Values.openwebui.timeoutSeconds | quote }}}
+            - {name: OPENWEBUI_ACP_ALLOW_INSECURE_HTTP, value: {{ .Values.openwebui.allowInsecureHttp | quote }}}
+            - {name: BUZZ_RELAY_URL, value: {{ .Values.buzz.relayUrl | quote }}}
+            - {name: OPENWEBUI_ACP_BUZZ_ALLOWED_AUTHORS, value: {{ join "," .Values.buzz.allowedAuthors | quote }}}
+            - {name: OPENWEBUI_ACP_BUZZ_ALLOWED_CHANNELS, value: {{ join "," .Values.buzz.allowedChannels | quote }}}
+            - {name: RUST_LOG, value: warn}
+          volumeMounts:
+            - {name: private-secrets, mountPath: /run/secrets, subPath: keys, readOnly: true}
+            - {name: state, mountPath: /state, subPath: state}
+            - {name: temporary, mountPath: /tmp}
+      volumes:
+        - name: projected-secrets
+          secret:
+            secretName: {{ .Values.credentials.existingSecret | quote }}
+            defaultMode: 0440
+            items:
+              - {key: openwebui-key, path: openwebui-key}
+              - {key: buzz-key, path: buzz-key}
+        - name: private-secrets
+          emptyDir: {medium: Memory, sizeLimit: 1Mi}
+        - name: temporary
+          emptyDir: {medium: Memory, sizeLimit: 16Mi}
+        - name: state
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | default (include "openwebui-acp.name" .) | quote }}

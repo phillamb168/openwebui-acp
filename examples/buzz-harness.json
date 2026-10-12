@@ -1,0 +1,8 @@
+{
+  "id": "openwebui-acp",
+  "label": "Open WebUI",
+  "command": "/absolute/path/openwebui-acp",
+  "args": ["--env-file", "/absolute/private/buzz-openwebui.env", "--buzz-auto-publish", "true", "--state-dir", "/absolute/private/buzz-openwebui-state"],
+  "env": {},
+  "installHint": "Build openwebui-acp with cargo build --locked --release, then set the absolute executable and configuration paths."
+}

@@ -1,0 +1,12 @@
+diff --git a/crates/buzz-acp/src/queue.rs b/crates/buzz-acp/src/queue.rs
+--- a/crates/buzz-acp/src/queue.rs
++++ b/crates/buzz-acp/src/queue.rs
+@@ -79,7 +79,7 @@
+ }
+ 
+ /// Maximum events drained into a single batch.
+-const MAX_BATCH_EVENTS: usize = 50;
++const MAX_BATCH_EVENTS: usize = 1;
+ 
+ /// Maximum retry attempts before a batch is dead-lettered.
+ pub(crate) const MAX_RETRIES: u32 = 10;

@@ -1,0 +1,16 @@
+*
+!Cargo.toml
+!Cargo.lock
+!src/
+!src/**
+!examples/
+!examples/sidecar_launcher.rs
+!LICENSE
+!THIRD_PARTY_NOTICES.md
+!licenses/
+!licenses/**
+!deploy/
+!deploy/**
+deploy/**/.env
+deploy/**/secrets/
+deploy/**/state/

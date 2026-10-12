@@ -1,0 +1,14 @@
+/target/
+/.work/
+.env
+.env.*
+!.env.example
+*.log
+__pycache__/
+*.pyc
+.DS_Store
+/dist/
+/BUILD.json
+/private-config/
+/deploy/sidecar/secrets/
+/deploy/sidecar/state/

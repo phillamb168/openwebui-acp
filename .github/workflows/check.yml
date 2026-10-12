@@ -1,0 +1,95 @@
+name: Check release candidate
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  boundaries:
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm, macos-15]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de
+        with:
+          toolchain: 1.98.1
+          components: rustfmt, clippy
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets --locked -- -D warnings
+      - run: cargo test --all-targets --locked
+      - run: python3 scripts/export_check.py
+      - if: matrix.os == 'ubuntu-24.04'
+        run: |
+          python3 scripts/export_check.py --copy-to "$RUNNER_TEMP/public-source"
+          docker run --rm --mount "type=bind,source=$RUNNER_TEMP/public-source,target=/src,readonly" ghcr.io/gitleaks/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f dir /src --redact --no-banner
+      - run: cargo install cargo-deny --version 0.20.2 --locked
+        if: matrix.os == 'ubuntu-24.04'
+      - run: cargo deny check advisories licenses sources bans
+        if: matrix.os == 'ubuntu-24.04'
+      - name: Check dependency inventories and bundled runner
+        if: matrix.os == 'ubuntu-24.04'
+        env:
+          RUSTUP_TOOLCHAIN: 1.98.1
+        run: |
+          python3 scripts/dependencies.py --out "$RUNNER_TEMP/adapter-inventory"
+          diff -r licenses/generated/adapter "$RUNNER_TEMP/adapter-inventory"
+          git init "$RUNNER_TEMP/buzz"
+          git -C "$RUNNER_TEMP/buzz" remote add origin https://github.com/block/buzz
+          git -C "$RUNNER_TEMP/buzz" fetch --depth 1 origin f87c10895ea35a9a2cea629fef1d7532a3fecbc5
+          git -C "$RUNNER_TEMP/buzz" checkout --detach FETCH_HEAD
+          git -C "$RUNNER_TEMP/buzz" apply --check "$PWD/deploy/sidecar/buzz-single-event.patch" "$PWD/deploy/sidecar/buzz-persona-yaml.patch"
+          git -C "$RUNNER_TEMP/buzz" apply "$PWD/deploy/sidecar/buzz-single-event.patch" "$PWD/deploy/sidecar/buzz-persona-yaml.patch"
+          cargo test --manifest-path "$RUNNER_TEMP/buzz/Cargo.toml" --locked -p buzz-persona
+          for target in x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu; do
+            for member in buzz-acp buzz-cli; do
+              cargo deny --manifest-path "$RUNNER_TEMP/buzz/crates/$member/Cargo.toml" --config "$PWD/deny.toml" --locked --exclude-dev --target "$target" check advisories licenses
+            done
+          done
+          python3 scripts/dependencies.py --manifest "$RUNNER_TEMP/buzz/Cargo.toml" --root buzz-acp --root buzz-cli --out "$RUNNER_TEMP/buzz-inventory"
+          diff -r licenses/generated/buzz "$RUNNER_TEMP/buzz-inventory"
+  disposable-integration:
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de
+        with:
+          toolchain: 1.98.1
+      - uses: ./.github/actions/test-tools
+      - run: python3 tests/chart.py
+      - run: cargo build --locked --examples --bins
+      - run: docker compose -f tests/integration/compose.yml up -d --wait
+      - run: python3 tests/integration/bootstrap.py
+      - run: python3 tests/integration/run_smoke.py
+      - run: docker build -t openwebui-acp-sidecar:local -t openwebui-acp-sidecar:0.1.0-rc.2 -f deploy/sidecar/Dockerfile .
+      - name: Scan sidecar OS packages
+        run: |
+          docker save openwebui-acp-sidecar:local -o "$RUNNER_TEMP/sidecar.tar"
+          docker run --rm --mount "type=bind,source=$RUNNER_TEMP/sidecar.tar,target=/image.tar,readonly" aquasec/trivy@sha256:62b1e65e8869bc4b4c6aa4fa2b21595256c7c2f6018a9d9ad61caf87187c1969 image --input /image.tar --scanners vuln --pkg-types os --severity HIGH,CRITICAL --exit-code 1
+      - run: python3 tests/integration/prepare_relay.py
+      - run: docker compose -f tests/integration/buzz-compose.yml up -d --wait relay
+      - run: python3 tests/integration/buzz_fixture.py
+      - run: docker compose -f tests/integration/buzz-compose.yml --profile agent up -d agent
+      - run: python3 tests/integration/run_buzz.py
+      - name: Test both charts in an explicitly isolated cluster
+        run: |
+          kind create cluster --name openwebui-acp-ci --kubeconfig "$RUNNER_TEMP/fixture-kubeconfig" --image kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5 --wait 120s
+          kind load docker-image openwebui-acp-sidecar:0.1.0-rc.2 --name openwebui-acp-ci
+          python3 tests/integration/run_kubernetes.py --kubeconfig "$RUNNER_TEMP/fixture-kubeconfig"
+      - if: always()
+        run: |
+          kind delete cluster --name openwebui-acp-ci
+          docker compose -f tests/integration/buzz-compose.yml --profile agent down -v
+          docker compose -f tests/integration/compose.yml down -v

@@ -1,0 +1,9 @@
+{
+  "agent_servers": {
+    "Open WebUI": {
+      "type": "custom",
+      "command": "/absolute/path/openwebui-acp",
+      "args": ["--env-file", "/absolute/private/openwebui.env", "--state-dir", "/absolute/private/openwebui-state"]
+    }
+  }
+}

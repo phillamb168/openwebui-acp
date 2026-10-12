@@ -1,0 +1,13 @@
+image:
+  repository: openwebui-acp-sidecar
+  tag: "0.1.0-rc.2"
+openwebui:
+  url: https://webui.example.org
+  model: your-workspace-model-id
+buzz:
+  relayUrl: wss://relay.example.org
+  # Replace these sample identifiers before installing.
+  allowedAuthors: ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]
+  allowedChannels: ["00000000-0000-4000-8000-000000000001"]
+credentials:
+  existingSecret: openwebui-acp-credentials

@@ -1,0 +1,159 @@
+diff --git a/Cargo.lock b/Cargo.lock
+index 15b190f..a254a16 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -102,6 +102,17 @@ dependencies = [
+  "libc",
+ ]
+ 
++[[package]]
++name = "annotate-snippets"
++version = "0.12.16"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "f211a51805bc641f3ad5b7664c77d2547af685cc33b4cd8d31964027a46f13f1"
++dependencies = [
++ "anstyle",
++ "memchr",
++ "unicode-width 0.2.2",
++]
++
+ [[package]]
+ name = "anstream"
+ version = "1.0.0"
+@@ -223,6 +234,12 @@ dependencies = [
+  "password-hash 0.6.1",
+ ]
+ 
++[[package]]
++name = "arraydeque"
++version = "0.5.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "7d902e3d592a523def97af8f317b08ce16b7ab854c1985a0c671e6f15cebc236"
++
+ [[package]]
+ name = "arrayref"
+ version = "0.3.9"
+@@ -1360,8 +1377,8 @@ name = "buzz-persona"
+ version = "0.1.0"
+ dependencies = [
+  "serde",
++ "serde-saphyr",
+  "serde_json",
+- "serde_yaml",
+  "tempfile",
+  "thiserror 2.0.18",
+ ]
+@@ -2983,6 +3000,15 @@ dependencies = [
+  "cfg-if 1.0.4",
+ ]
+ 
++[[package]]
++name = "encoding_rs_io"
++version = "0.1.8"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "fba3fe847045ecff794b9c138293a80db914678c453ad63fbf0c6a9eb6e00b22"
++dependencies = [
++ "encoding_rs",
++]
++
+ [[package]]
+ name = "endi"
+ version = "1.1.1"
+@@ -3627,6 +3653,16 @@ dependencies = [
+  "wasm-bindgen",
+ ]
+ 
++[[package]]
++name = "granit-parser"
++version = "1.3.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "e20f99e46474f56bd905c56e817ebddcf377a611f94c53ac4649e4d3fa3c0cd0"
++dependencies = [
++ "arraydeque",
++ "smallvec",
++]
++
+ [[package]]
+ name = "group"
+ version = "0.13.0"
+@@ -9147,6 +9183,20 @@ dependencies = [
+  "serde_derive",
+ ]
+ 
++[[package]]
++name = "serde-saphyr"
++version = "1.3.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "b8050abb251097357e24aff63ba2c52a6309ecb7d23a5474023df960a02694d8"
++dependencies = [
++ "annotate-snippets",
++ "encoding_rs_io",
++ "granit-parser",
++ "num-traits",
++ "serde_core",
++ "smallvec",
++]
++
+ [[package]]
+ name = "serde-value"
+ version = "0.7.0"
+diff --git a/crates/buzz-persona/Cargo.toml b/crates/buzz-persona/Cargo.toml
+index 8849650..6b99368 100644
+--- a/crates/buzz-persona/Cargo.toml
++++ b/crates/buzz-persona/Cargo.toml
+@@ -9,7 +9,7 @@ repository = "https://github.com/block/sprout"
+ [dependencies]
+ serde = { version = "1", features = ["derive"] }
+ serde_json = "1"
+-serde_yaml = "0.9"
++serde-saphyr = { version = "=1.3.0", default-features = false, features = ["deserialize"] }
+ thiserror = "2"
+ 
+ [dev-dependencies]
+diff --git a/crates/buzz-persona/src/persona.rs b/crates/buzz-persona/src/persona.rs
+index b7a49d4..2a14e74 100644
+--- a/crates/buzz-persona/src/persona.rs
++++ b/crates/buzz-persona/src/persona.rs
+@@ -41,7 +41,7 @@ pub enum PersonaError {
+     TooLarge(String),
+ 
+     #[error("failed to parse YAML frontmatter: {0}")]
+-    Yaml(#[from] serde_yaml::Error),
++    Yaml(#[from] serde_saphyr::Error),
+ 
+     #[error("missing required field: {0}")]
+     MissingField(String),
+@@ -215,7 +215,7 @@ pub fn parse_persona_md(content: &str) -> Result<PersonaConfig, PersonaError> {
+         return Err(PersonaError::BodyTooLarge);
+     }
+ 
+-    let fm: Frontmatter = serde_yaml::from_str(fm_str)?;
++    let fm: Frontmatter = serde_saphyr::from_str(fm_str)?;
+ 
+     let name = fm.name.ok_or(PersonaError::MissingField("name".into()))?;
+     let display_name = fm
+diff --git a/crates/buzz-persona/src/validate.rs b/crates/buzz-persona/src/validate.rs
+index 12e5887..15c14bf 100644
+--- a/crates/buzz-persona/src/validate.rs
++++ b/crates/buzz-persona/src/validate.rs
+@@ -404,17 +404,17 @@ fn advisory_check_skill_names(
+             None => continue,
+         };
+ 
+-        let yaml_val: serde_yaml::Value = match serde_yaml::from_str(fm_str) {
++        let yaml_val: serde_json::Value = match serde_saphyr::from_str(fm_str) {
+             Ok(v) => v,
+             Err(_) => continue,
+         };
+ 
+-        let mapping = match yaml_val.as_mapping() {
++        let mapping = match yaml_val.as_object() {
+             Some(m) => m,
+             None => continue,
+         };
+ 
+-        if let Some(name_val) = mapping.get(serde_yaml::Value::String("name".into())) {
++        if let Some(name_val) = mapping.get("name") {
+             if let Some(name_str) = name_val.as_str() {
+                 if let Some(dir_name) = skill_dir.file_name().and_then(|n| n.to_str()) {
+                     if name_str != dir_name {

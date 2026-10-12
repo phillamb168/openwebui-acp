@@ -1,0 +1,14 @@
+apiVersion: v2
+name: openwebui-acp
+description: A single persistent Buzz agent backed by an Open WebUI Workspace model
+type: application
+version: 0.1.0-rc.2
+appVersion: "0.1.0-rc.2"
+kubeVersion: ">=1.30.0-0"
+keywords: [acp, openwebui, buzz]
+home: https://github.com/phillamb168/openwebui-acp
+sources:
+  - https://github.com/phillamb168/openwebui-acp
+maintainers:
+  - name: phillamb168
+    url: https://github.com/phillamb168

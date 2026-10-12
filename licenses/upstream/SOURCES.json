@@ -1,0 +1,87 @@
+[
+  {
+    "package": "agent-client-protocol",
+    "version": "2.1.0",
+    "source": "https://raw.githubusercontent.com/agentclientprotocol/rust-sdk/726c5030bfaa88cfdac2fb1f71a63abb331ce586/LICENSE"
+  },
+  {
+    "package": "agent-client-protocol-derive",
+    "version": "2.1.0",
+    "source": "https://raw.githubusercontent.com/agentclientprotocol/rust-sdk/726c5030bfaa88cfdac2fb1f71a63abb331ce586/LICENSE"
+  },
+  {
+    "package": "agent-client-protocol-schema",
+    "version": "1.7.0",
+    "source": "https://raw.githubusercontent.com/agentclientprotocol/agent-client-protocol/272bf799f35a258c6a4107a0410ed361e83683d3/LICENSE"
+  },
+  {
+    "package": "bitcoin-consensus-encoding",
+    "version": "1.2.0",
+    "source": "https://raw.githubusercontent.com/rust-bitcoin/rust-bitcoin/b58b6067d27f1e1b0a257dd2321a22ad09fcdb7b/LICENSE"
+  },
+  {
+    "package": "bitcoin-internals",
+    "version": "0.6.0",
+    "source": "https://raw.githubusercontent.com/rust-bitcoin/rust-bitcoin/b58b6067d27f1e1b0a257dd2321a22ad09fcdb7b/LICENSE"
+  },
+  {
+    "package": "bitcoin-io",
+    "version": "0.1.101",
+    "source": "https://raw.githubusercontent.com/rust-bitcoin/rust-bitcoin/b58b6067d27f1e1b0a257dd2321a22ad09fcdb7b/LICENSE"
+  },
+  {
+    "package": "bitcoin_hashes",
+    "version": "0.14.101",
+    "source": "https://raw.githubusercontent.com/rust-bitcoin/rust-bitcoin/b58b6067d27f1e1b0a257dd2321a22ad09fcdb7b/LICENSE"
+  },
+  {
+    "package": "defmt-parser",
+    "version": "1.0.0",
+    "source": "https://raw.githubusercontent.com/knurling-rs/defmt/4a8cdb44891ed57b8ff5a023b6bec7137c48708f/LICENSE-MIT"
+  },
+  {
+    "package": "nostr",
+    "version": "0.44.8",
+    "source": "https://raw.githubusercontent.com/rust-nostr/nostr/a86ce27c3b4d0dcab186a707336237653a01b114/LICENSE"
+  },
+  {
+    "package": "valuable",
+    "version": "0.1.1",
+    "source": "https://raw.githubusercontent.com/tokio-rs/valuable/9efc29b6e58cef28f6566a47aa7e142a55fead77/LICENSE"
+  },
+  {
+    "package": "winapi-i686-pc-windows-gnu",
+    "version": "0.4.0",
+    "source": "https://raw.githubusercontent.com/retep998/winapi-rs/5b1829956ef645f3c2f8236ba18bb198ca4c2468/LICENSE-MIT"
+  },
+  {
+    "package": "winapi-x86_64-pc-windows-gnu",
+    "version": "0.4.0",
+    "source": "https://raw.githubusercontent.com/retep998/winapi-rs/5b1829956ef645f3c2f8236ba18bb198ca4c2468/LICENSE-MIT"
+  },
+  {
+    "package": "jni",
+    "version": "0.21.1",
+    "source": "https://raw.githubusercontent.com/jni-rs/jni-rs/09a5911358ffa846b5c85451c050a0e64669e863/LICENSE-MIT"
+  },
+  {
+    "package": "jni",
+    "version": "0.22.4",
+    "source": "https://raw.githubusercontent.com/jni-rs/jni-rs/5ae9458a4ec44c5318f37ddc7569c1d4ae8a69e7/LICENSE-MIT"
+  },
+  {
+    "package": "jni-macros",
+    "version": "0.22.4",
+    "source": "https://raw.githubusercontent.com/jni-rs/jni-rs/33045a124105c939d1e2cbdcb5a39e5d868ffa03/LICENSE-MIT"
+  },
+  {
+    "package": "jni-sys-macros",
+    "version": "0.4.1",
+    "source": "https://raw.githubusercontent.com/jni-rs/jni-sys/64d77b7a5f119d7b55b4e2c169a4668067ff59e6/LICENSE-MIT"
+  },
+  {
+    "package": "rustls-platform-verifier-android",
+    "version": "0.1.1",
+    "source": "https://raw.githubusercontent.com/rustls/rustls-platform-verifier/73a4df87d84b424c22d7818ce3ffbcefda5dff37/LICENSE-MIT"
+  }
+]

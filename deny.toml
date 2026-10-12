@@ -1,0 +1,24 @@
+[graph]
+targets = ["aarch64-apple-darwin", "x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu"]
+
+[advisories]
+version = 2
+yanked = "deny"
+
+[licenses]
+version = 2
+allow = ["MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC", "Unicode-3.0", "CC0-1.0", "CDLA-Permissive-2.0", "Zlib"]
+confidence-threshold = 0.8
+# Only the bundled upstream CLI uses this crate. Its complete unmodified source
+# and MPL text accompany the sidecar and archives in licenses/source/.
+exceptions = [{ crate = "option-ext@0.2.0", allow = ["MPL-2.0"] }]
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-git = ["https://github.com/block/buzz"]
+required-git-spec = "rev"
