@@ -11,8 +11,13 @@ use std::{
 };
 
 fn agent(url: &str) -> AcpAgent {
+    // Packaging CI runs this same official-SDK transcript against the extracted
+    // release executable, including mocked turns, cancellation and stdout checks.
+    let binary = std::env::var_os("OPENWEBUI_ACP_TEST_BINARY")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|| env!("CARGO_BIN_EXE_openwebui-acp").into());
     AcpAgent::new(
-        AcpAgentConfig::new(env!("CARGO_BIN_EXE_openwebui-acp"))
+        AcpAgentConfig::new(binary)
             .args([
                 "--url",
                 url,

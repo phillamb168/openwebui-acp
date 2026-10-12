@@ -4,6 +4,8 @@
 
 Read [AGENTS.md](AGENTS.md), [the architecture](docs/ARCHITECTURE.md) and [SECURITY.md](SECURITY.md). Open WebUI owns the model/tool loop, stdout carries only ACP, and remote tools do not gain access to the client's filesystem. Discuss changes to those boundaries before implementing them.
 
+Use [Discussions](https://github.com/phillamb168/openwebui-acp/discussions) for feature ideas, setup questions and reports of new use cases. Use [issues](https://github.com/phillamb168/openwebui-acp/issues) for reproducible bugs. Early alpha feedback is especially useful on first installation, supported client versions, thread isolation and restart behavior; include sanitized version/configuration details.
+
 ## Local development
 
 Use macOS or Linux with a C toolchain and rustup; `rust-toolchain.toml` selects Rust 1.98.1. Python 3.11+ supports the release and integration scripts. Fork/clone [phillamb168/openwebui-acp](https://github.com/phillamb168/openwebui-acp), or use the reviewed source export, and create a branch for your change.

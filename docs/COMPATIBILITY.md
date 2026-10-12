@@ -5,8 +5,8 @@ Current candidate: **0.1.0-rc.2**, checked 2026-10-12. Pass means an executed te
 | Surface | Recorded version | Coverage |
 | --- | --- | --- |
 | ACP | Stable v1; official Rust SDK 2.1.0 / schema 1.7.0 | SDK transcripts, sessions, stdout purity, cancellation, `session/load`, SIGKILL recovery |
-| macOS ARM64 | Rust 1.98.1 | 47 boundary tests, fmt/Clippy, optimized build; actual Zed UI and native Buzz runner |
-| Linux ARM64 and x86_64 | Rust 1.98.1 / Debian builder | 47 boundary tests on each architecture, including child-process crash tests; x86_64 executes under emulation on an ARM host |
+| macOS ARM64 | Rust 1.98.1 | 48 boundary tests and fmt/Clippy in hosted CI; earlier local optimized-build, Zed UI and native Buzz runner evidence is recorded separately |
+| Linux ARM64 and x86_64 | Rust 1.98.1 / Ubuntu 24.04 hosted runners | 48 boundary tests on each architecture, including child-process crash tests; Docker, Open WebUI/Buzz and Kind suites on both hosted architectures |
 | Open WebUI | 0.12.0; source `15818d88fd7bde1b73de33590f50d15d21e8d7c1` | Eight fixture scenarios/nine prompts using real server APIs, tools, MCP, Skills, Knowledge and model controls |
 | Buzz SDK/headless runner | Desktop 0.5.28 source `f87c10895ea35a9a2cea629fef1d7532a3fecbc5` | SDK unmodified; bundled runner carries documented single-event and YAML-parser patches |
 | Buzz relay | 0.2.1; source `6e5c462ac524de60d7edb46c66130fd779cc9006` | Authenticated fixture relay with memberships, signed replies and exact recipients |
@@ -14,7 +14,7 @@ Current candidate: **0.1.0-rc.2**, checked 2026-10-12. Pass means an executed te
 | Zed | Official 1.23.2 macOS ARM64 | Six actual UI prompts/two chats; Workspace tool, MCP, Skill, Knowledge, app quit/reopen with same ACP/chat IDs, new-session isolation |
 | VM deployment | Ubuntu 24.04 ARM64 and emulated x86_64; Docker 29.1.3 / Compose 2.40.3 | Public Compose installation and same-chat continuation after disposable machine restart; exact final evidence is in the verification record |
 | Kubernetes | Kind 0.33.0 / Kubernetes 1.37.0 / Helm 4.3.0 | Agent chart beside published Buzz chart 0.1.11/relay 0.2.1; permissions, tools, threads, recovery, queue, upgrade and retained-PVC reinstall |
-| Hosted CI | Definitions in this checkout | Not run on GitHub; operator-created public repository is stage two |
+| Hosted CI | [All five jobs passed](https://github.com/phillamb168/openwebui-acp/actions/runs/38288231644) at public commit `5cce67e66a086410e53a249d16bfb83ee3d5f234` | macOS ARM64 and both Linux targets; source/secret and dependency/license scans; both images, six chart checks and disposable Open WebUI/Buzz/Kind integrations |
 | Other platforms | Windows, macOS Intel, musl/Alpine, other storage drivers/clusters | Not validated targets |
 
 Open WebUI image: `ghcr.io/open-webui/open-webui:v0.12.0@sha256:1565038903151ced924b5a3226f73f40f16963df4b910441f6391f10144afdaa`.
@@ -46,7 +46,9 @@ The native Buzz suite uses queue handling, one worker and adapter-owned thread m
 
 Stock Desktop can merge multiple pending events. The adapter rejects this before inference/publication; the runner retries with bounded backoff. Sequential mentions work. The bundled headless runner's pinned one-event patch handles queued events individually. An older mention was ignored on manual startup in the fixture, but a recent event inside the runner's subscription overlap can replay; durable delivery IDs handle already-delivered events.
 
-The Kubernetes chart fixes replicas at one with Recreate and a private journal. Kind local-path storage is the tested backend. It is not high availability, tenant isolation, a distributed journal, an arbitrary-CSI guarantee or cloud-cluster certification. OrbStack VM machines share a kernel, so their restart check verifies machine/container service continuity rather than physical host reboot. The x86_64 run uses emulation.
+The Kubernetes chart fixes replicas at one with Recreate and a private journal. Kind local-path storage is the tested backend. It is not high availability, tenant isolation, a distributed journal, an arbitrary-CSI guarantee or cloud-cluster certification. OrbStack VM machines share a kernel, so their restart check verifies machine/container service continuity rather than physical host reboot. The local x86_64 VM test uses emulation; later hosted Linux x86_64 checks run on GitHub's x86_64 runner.
+
+The linked hosted run established the first green public revision. Each release must pass checks again at its own source revision. The package workflow verifies extracted archives and runs the existing official-SDK ACP transcripts against each packaged executable; release notes and the accompanying verification record identify the exact build run. Earlier desktop UI evidence is not a claim that every later build was retested in those UIs.
 
 Zed's isolated profile is passed to the app executable directly; launcher wrappers can drop those arguments. OS keychain and home-level skill discovery are separate from its data directory. Only the explicit synthetic agent was prompted. One active workspace owns a persistent state directory. Native UI cancellation and simultaneous editor processes sharing that directory were not tested; exclusive-lock behavior has boundary coverage.
 

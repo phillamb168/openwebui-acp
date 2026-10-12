@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Make unsigned, local release archives from a clean, scanned source revision."""
+"""Make unsigned release archives from a clean, scanned source revision."""
 import argparse
 import gzip
 import hashlib
@@ -76,7 +76,7 @@ def main():
         'name': 'openwebui-acp', 'version': version, 'source_revision': revision,
         'rust_toolchain': '1.98.1', 'target': args.target or 'source',
         'cargo_lock_sha256': hashlib.sha256((ROOT / 'Cargo.lock').read_bytes()).hexdigest(),
-        'signature': 'unsigned local candidate; checksums detect changes but do not authenticate a publisher',
+        'signature': 'unsigned; checksums detect changes but do not authenticate a publisher',
     }
     files.append(('BUILD.json', (json.dumps(info, indent=2) + '\n').encode(), False))
     args.out.mkdir(parents=True, exist_ok=True)

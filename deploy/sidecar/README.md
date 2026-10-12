@@ -15,7 +15,7 @@ The relay administrator can generate an identity with `buzz-admin generate-key` 
 
 ## Install
 
-From a reviewed source checkout or extracted source archive:
+From a reviewed source checkout or extracted source archive. To use a downloaded container instead of building, follow [release verification/loading](../../docs/RELEASE.md#choose-a-download), set `OPENWEBUI_ACP_IMAGE` to its architecture-specific tag, and skip `docker compose build` below:
 
 ```sh
 cd deploy/sidecar
@@ -58,4 +58,4 @@ The image also applies [buzz-persona-yaml.patch](buzz-persona-yaml.patch). Upstr
 
 The unmodified Desktop runner supports sequential mentions but can merge bursts. The bundled headless runner is the supported queue path. Remove its patch only after equivalent upstream behavior passes integration tests.
 
-See [TESTING.md](../../docs/TESTING.md) and [COMPATIBILITY.md](../../docs/COMPATIBILITY.md) for exact evidence. The image is operator-built and unsigned; no public registry image is assumed. Review OS and Rust dependency scans when rebuilding. Inventories, notices and covered MPL source accompany the image. Egress policy, relay operation, backups and TLS remain operator responsibilities.
+See [TESTING.md](../../docs/TESTING.md) and [COMPATIBILITY.md](../../docs/COMPATIBILITY.md) for exact evidence. Images can be operator-built or loaded from a checked release archive; they are unsigned and no public registry image is assumed. Review OS and Rust dependency scans when rebuilding. Inventories, notices and covered MPL source accompany the image. Egress policy, relay operation, backups and TLS remain operator responsibilities.
