@@ -32,17 +32,14 @@ def turn(text, expected, root=None):
     return root, reply['id']
 
 def check():
+    b.wait_agent()
     root_a, reply_a = turn('CHECK_TOOL. Remember ORCHARD in this new thread.', 'WORKSPACE-TOOL-MARKER-4821')
     first = state()['conversations'][f'buzz/{CHANNEL}/{root_a}']['chat_id']
     root_b, _ = turn('CHECK_CONTEXT in this other new thread.', 'MISSING_CONTEXT')
     second = state()['conversations'][f'buzz/{CHANNEL}/{root_b}']['chat_id']
     assert first != second
     subprocess.run(b.COMPOSE + ['restart', 'agent'], check=True, capture_output=True)
-    # Wait for stdio child startup after the container has started.
-    for _ in range(20):
-        try: state(); break
-        except (subprocess.CalledProcessError, json.JSONDecodeError): pass
-        time.sleep(1)
+    b.wait_agent()
     _, reply_c = turn('CHECK_CONTEXT after the runner restart.', 'ORCHARD', root_a)
     final = state()
     assert final['conversations'][f'buzz/{CHANNEL}/{root_a}']['chat_id'] == first

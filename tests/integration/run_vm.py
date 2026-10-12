@@ -10,7 +10,6 @@ import os
 from pathlib import Path
 import platform
 import subprocess
-import time
 
 import bootstrap as fixture
 import buzz_fixture as b
@@ -31,7 +30,7 @@ def wait_ready():
     # Bootstrap ports may change after reboot. Internal service names do not.
     run(b.COMPOSE + ['up', '-d', '--wait', 'relay'])
     run(COMPOSE + ['up', '-d'])
-    time.sleep(3)
+    b.wait_agent(COMPOSE)
 
 
 def started_at():
@@ -55,7 +54,7 @@ def main():
             'OPENWEBUI_ACP_REQUIRED_TOOLS=fixture_tool\nOPENWEBUI_ACP_BUZZ_ALLOWED_AUTHORS=' + b.IDENTITIES['owner'] +
             '\nOPENWEBUI_ACP_BUZZ_ALLOWED_CHANNELS=' + channel + '\n')
         fixture.secret_file(OVERRIDE.name, json.dumps({'services': {'agent': {
-            'environment': {'OPENWEBUI_ACP_ALLOW_INSECURE_HTTP': 'true'}, 'networks': ['webui', 'relay']}},
+            'environment': {'OPENWEBUI_ACP_ALLOW_INSECURE_HTTP': 'true', 'RUST_LOG': 'warn,buzz_acp=info'}, 'networks': ['webui', 'relay']}},
             'networks': {'webui': {'external': True, 'name': 'openwebui-acp-test_test'},
                          'relay': {'external': True, 'name': 'openwebui-acp-relay-test_default'}}}))
         run(['docker', 'run', '--rm', '--user', '0:0', '--mount', f'type=bind,source={b.WORK},target=/fixture,readonly',

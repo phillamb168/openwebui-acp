@@ -69,7 +69,7 @@ services:
       OPENWEBUI_MODEL: fixture-tool
       OPENWEBUI_ACP_ALLOW_INSECURE_HTTP: "true"
       OPENWEBUI_ACP_MEMORY_DEFAULT: "false"
-      RUST_LOG: warn
+      RUST_LOG: warn,buzz_acp=info
     volumes:
       - agent-secrets:/run/secrets:ro
       - agent-state:/state
